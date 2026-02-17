@@ -1,25 +1,30 @@
 public class Board {
 
     private static final int SIZE = 11;
-    private char[][] grid;
+    private Cell[][] grid;
 
     public Board() {
-        grid = new char[SIZE][SIZE];
+        grid = new Cell[SIZE][SIZE];
+        initialiseBoard();
+    }
 
-        // initialise board with empty cells
-        for (int row = 0; row < SIZE; row++) {
-            for (int col = 0; col < SIZE; col++) {
-                grid[row][col] = '.';
+    private void initialiseBoard() {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+
+                // For now, just alternate types
+                if ((i + j) % 2 == 0) {
+                    grid[i][j] = new OctagonalCell(i, j);
+                } else {
+                    grid[i][j] = new RhombicCell(i, j);
+                }
             }
         }
     }
 
-    public void printBoard() {
-        for (int row = 0; row < SIZE; row++) {
-            for (int col = 0; col < SIZE; col++) {
-                System.out.print(grid[row][col] + " ");
-            }
-            System.out.println();
-        }
+    public Cell getCell(int row, int col) {
+        return grid[row][col];
     }
+
 }
+
