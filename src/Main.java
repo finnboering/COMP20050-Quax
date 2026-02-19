@@ -1,7 +1,7 @@
-public class Main {
+import javafx.application.Application;
 
+public class Main {
     public static void main(String[] args) {
-        Board board = new Board();
-        board.displayBoard();
+        Application.launch(QuaxApp.class, args); // starts visual javafx window
     }
 }
