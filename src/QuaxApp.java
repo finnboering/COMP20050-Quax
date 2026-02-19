@@ -165,11 +165,11 @@ public class QuaxApp extends Application {
         }
     }
 
-    // math helpers to draw the shapes
+    // helper : draws the shapes
 
     private Polygon createOctagon(double x, double y, double size) {
         double half = size / 2.0;
-        double cut = size / 4.0; // how much to snip off the corners
+        double cut = size / 4.0; // how much to cut off the corners
 
         return new Polygon(
                 x - half + cut, y - half,       // top left
@@ -188,13 +188,13 @@ public class QuaxApp extends Application {
         square.setX(x - size / 2.0);
         square.setY(y - size / 2.0);
 
-        // tilt the square to make it a rhombic
+        // rotate the square to make it a rhombic
         square.setRotate(45);
 
         return square;
     }
 
-    // helper functions
+    // helper : turn functions
 
     public void switchTurns() {
         // flips the turn back and forth
