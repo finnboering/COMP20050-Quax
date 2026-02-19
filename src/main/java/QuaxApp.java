@@ -1,3 +1,11 @@
+/**
+ * The mainJavaFX application class for the Quax game.
+ * This class is responsible for:
+ * - Launching the JavaFX application
+ * - Creating the primary stage
+ * - Setting up the scene and user interface
+ */
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
@@ -22,6 +30,11 @@ public class QuaxApp extends Application {
 
     @Override
     public void start(Stage stage) {
+
+
+         // Called automatically when the JavaFX application starts.
+         // Sets up the primary stage and displays the board UI.
+
 
         // create a blank container to hold drawing
         Pane root = new Pane();
