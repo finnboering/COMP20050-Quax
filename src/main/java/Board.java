@@ -1,35 +1,56 @@
 public class Board {
 
-    // size of the board 11x11
-    private static final int SIZE = 11;
-
-    // the 2d array that holds all the tiles behind the scenes
-    private Tile[][] grid;
+    // size of the board
+    int BOARD_SIZE = 11;
 
     public Board() {
-        // sets up the empty grid and then fills it
-        grid = new Tile[SIZE][SIZE];
+        // initalize the empty grids
+        octagons = new Tile[BOARD_SIZE][BOARD_SIZE];
+        rhombics = new Tile[BOARD_SIZE - 1][BOARD_SIZE - 1];
         initialiseBoard();
     }
 
-    private void initialiseBoard() {
-        // loops through every row and column to place the tiles
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
+    // separate arrays to hold octagons and rhombics
+    Tile[][] octagons;
+    Tile[][] rhombics;
 
-                // alternating between octagon and rhombic
-                if ((i + j) % 2 == 0) {
-                    grid[i][j] = new OctagonTile(i, j);
-                } else {
-                    grid[i][j] = new RhombicTile(i, j);
-                }
+    private void initialiseBoard() {
+        // fills the 11x11 array with octagons
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                octagons[r][c] = new OctagonTile(r, c);
+            }
+        }
+
+
+        // fills the 10x10 array with rhombics
+        for (int r = 0; r < BOARD_SIZE - 1; r++) {
+            for (int c = 0; c < BOARD_SIZE - 1; c++) {
+                rhombics[r][c] = new RhombicTile(r, c);
             }
         }
     }
 
-    public Tile getTile(int row, int col) {
-        // helper : grabs a specific tile from the board
-        return grid[row][col];
+    // SR2.1 & SR2.2 : basic tile placement for octagons
+    public boolean tryPlacingOctagonTile(int r, int c, boolean isBlackTurn) {
+
+        Tile clickedTile = octagons[r][c];
+
+        // only allow placement if it has no tile yet
+        if (clickedTile.hasNoTile()) {
+
+            // assign the tile to the current player
+            if (isBlackTurn) {
+                clickedTile.setPlayerTile(1); // black
+            } else {
+                clickedTile.setPlayerTile(2); // white
+            }
+
+            return true; // tile placed successfully
+        }
+
+        return false; // placement failed
     }
 
+    // TODO : figure out rhombic tile placement later
 }
