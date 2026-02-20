@@ -39,7 +39,7 @@ public class QuaxApp extends Application {
         drawBorders(root);
         drawLabels(root);
 
-        // figure out how big the pop-up window needs to be
+        // how big the popup window needs to be
         double windowSize = BOARD_SIZE * CELL_SIZE + (OFFSET * 2) - 38;
 
         Scene scene = new Scene(root, windowSize, windowSize);
@@ -127,7 +127,7 @@ public class QuaxApp extends Application {
     }
 
     private void drawLabels(Pane root) {
-        Font labelFont = Font.font(14);
+        Font labelFont = Font.font(14); // keeps font size the same
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             double pos = i * CELL_SIZE + OFFSET;
