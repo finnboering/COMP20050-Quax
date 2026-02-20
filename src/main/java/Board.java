@@ -7,6 +7,7 @@
 
 public class Board {
 
+    // size of the board 11x11
     private static final int SIZE = 11;
     private Cell[][] grid;
 
@@ -22,10 +23,11 @@ public class Board {
 
 
     private void initialiseBoard() {
+        // loops through every row and column to place the tiles
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
 
-                // For now, just alternate types
+                // alternating between octagon and rhombic
                 if ((i + j) % 2 == 0) {
                     grid[i][j] = new OctagonalCell(i, j);
                 } else {
