@@ -2,31 +2,38 @@ public class Board {
 
     // size of the board
     int BOARD_SIZE = 11;
+    //single grid for all tiles
+    private Tile[][] grid;
+
+    // separate arrays to hold octagons and rhombics
+    private Tile[][] octagons;
+    private Tile[][] rhombics;
 
     public Board() {
         // initalize the empty grids
+        grid = new Tile[BOARD_SIZE][BOARD_SIZE];
         octagons = new Tile[BOARD_SIZE][BOARD_SIZE];
         rhombics = new Tile[BOARD_SIZE - 1][BOARD_SIZE - 1];
         initialiseBoard();
     }
 
-    // separate arrays to hold octagons and rhombics
-    Tile[][] octagons;
-    Tile[][] rhombics;
+
 
     private void initialiseBoard() {
-        // fills the 11x11 array with octagons
+        // fills the 11x11 array with octagons and updates grid
         for (int r = 0; r < BOARD_SIZE; r++) {
             for (int c = 0; c < BOARD_SIZE; c++) {
-                octagons[r][c] = new OctagonTile(r, c);
-            }
-        }
-
-
-        // fills the 10x10 array with rhombics
-        for (int r = 0; r < BOARD_SIZE - 1; r++) {
-            for (int c = 0; c < BOARD_SIZE - 1; c++) {
-                rhombics[r][c] = new RhombicTile(r, c);
+                if ((r + c) % 2 == 0) {
+                    OctagonTile oct = new OctagonTile(r, c);
+                    octagons[r][c] = oct;
+                    grid[r][c] = oct;
+                } else {
+                    RhombicTile rhom = new RhombicTile(r, c);
+                    if (r < BOARD_SIZE - 1 && c < BOARD_SIZE - 1) {
+                        rhombics[r][c] = rhom;
+                    }
+                    grid[r][c] = rhom;
+                }
             }
         }
     }
@@ -50,6 +57,10 @@ public class Board {
         }
 
         return false; // placement failed
+    }
+
+    public Tile getTile(int row, int col) {
+        return grid[row][col];
     }
 
     // TODO : figure out rhombic tile placement later
