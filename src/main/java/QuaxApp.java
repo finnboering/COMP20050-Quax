@@ -17,9 +17,13 @@ public class QuaxApp extends Application {
 
     // ui colors
     private static final Color OCTAGON_COLOR = Color.DEEPSKYBLUE;
+    private static final Color OCTAGON_HIGHLIGHT_COLOR = Color.PALETURQUOISE;
     private static final Color RHOMBIC_COLOR = Color.SKYBLUE;
+    private static final Color RHOMBIC_HIGHLIGHT_COLOR = Color.PALETURQUOISE;
     private static final Color BORDER_COLOR = Color.ORANGE;
     private static final Color OUTLINE_COLOR = Color.BLACK;
+    private static final Color BLACK_STONE = Color.BLACK;
+    private static final Color WHITE_STONE = Color.WHITE;
 
     // keeps track of whose turn it is
     private boolean isBlackTurn = true;
@@ -27,6 +31,14 @@ public class QuaxApp extends Application {
     // arrays to hold our shapes
     private Polygon[][] octagons = new Polygon[BOARD_SIZE][BOARD_SIZE];
     private Rectangle[][] rhombics = new Rectangle[BOARD_SIZE -1][BOARD_SIZE -1];
+
+    // turn indicator text
+    private Text turnText;
+    private Text statusText;
+
+    // track occupancy of tile: 0 empty, 1 black, 2 white
+    private int[][] octagonOwner = new int[BOARD_SIZE][BOARD_SIZE];
+    private int[][] rhombicOwner = new int[BOARD_SIZE - 1][BOARD_SIZE - 1];
 
     @Override
     public void start(Stage stage) {
@@ -38,9 +50,10 @@ public class QuaxApp extends Application {
         drawRhombics(root);
         drawBorders(root);
         drawLabels(root);
+        initHUD(root);
 
         // how big the popup window needs to be
-        double windowSize = BOARD_SIZE * CELL_SIZE + (OFFSET * 2) - 38;
+        double windowSize = BOARD_SIZE * CELL_SIZE + (OFFSET * 2) - 22;
 
         Scene scene = new Scene(root, windowSize, windowSize);
         stage.setTitle("Quax Board");
@@ -77,6 +90,29 @@ public class QuaxApp extends Application {
                 // save it in our array
                 octagons[row][col] = octagon;
 
+                // capture loop variables
+                final int r = row;
+                final int c = col;
+
+                octagon.setOnMouseClicked(e -> attemptPlaceOnOctagon(r, c));
+
+                octagon.setOnMouseEntered(e -> {
+                
+                    // only highlight if empty
+                    if (octagonOwner[r][c] == 0) {
+                    //octagon.setOpacity(0.5);
+                        octagon.setFill(OCTAGON_HIGHLIGHT_COLOR);
+                    }
+                });
+
+                octagon.setOnMouseExited(e -> {
+                
+                    // restore original colour if still empty
+                    if (octagonOwner[r][c] == 0) {
+                        octagon.setFill(OCTAGON_COLOR);
+                    }
+                });
+
                 root.getChildren().add(octagon);
             }
         }
@@ -98,6 +134,26 @@ public class QuaxApp extends Application {
 
                 // save it in the array
                 rhombics[row][col] = rhombic;
+
+                final int r = row;
+                final int c = col;
+                rhombic.setOnMouseClicked(e -> attemptPlaceOnRhombic(r, c));
+
+                rhombic.setOnMouseEntered(e -> {
+                
+                    // only highlight if empty
+                    if (rhombicOwner[r][c] == 0) {
+                        rhombic.setFill(RHOMBIC_HIGHLIGHT_COLOR);
+                    }
+                });
+                
+                rhombic.setOnMouseExited(e -> {
+                
+                    // restore original colour if still empty
+                    if (rhombicOwner[r][c] == 0) {
+                        rhombic.setFill(RHOMBIC_COLOR);
+                    }
+                });
 
                 root.getChildren().add(rhombic);
             }
@@ -194,6 +250,27 @@ public class QuaxApp extends Application {
         return square;
     }
 
+    private void initHUD(Pane root) {
+        turnText = new Text();
+        turnText.setFont(Font.font(18));
+        turnText.setFill(Color.BLACK);
+        turnText.setX(20);
+        turnText.setY(BOARD_SIZE * CELL_SIZE + (OFFSET * 2) -30);
+
+        statusText = new Text("");
+        statusText.setFont(Font.font(14));
+        statusText.setFill(Color.BLACK);
+        statusText.setX(150);
+        statusText.setY(BOARD_SIZE * CELL_SIZE + (OFFSET * 2) -30);
+
+        updateTurnText();
+        root.getChildren().addAll(turnText, statusText);
+    }       
+
+    private void updateTurnText() {
+        turnText.setText("Turn: " + getCurrentPlayerTurn());
+    }
+
     // helper : turn functions
 
     public void switchTurns() {
@@ -208,6 +285,37 @@ public class QuaxApp extends Application {
         } else {
             return "WHITE";
         }
+    }
+
+        private void attemptPlaceOnOctagon(int row, int col) {
+        // no full legality: only prevent overwriting an occupied cell
+        if (octagonOwner[row][col] != 0) {
+            statusText.setText("That cell is already occupied.");
+            return;
+        }
+        // place stone
+        octagonOwner[row][col] = isBlackTurn ? 1 : 2;
+        octagons[row][col].setFill(isBlackTurn ? BLACK_STONE : WHITE_STONE);;
+        
+
+        // clear message + switch turn
+        statusText.setText("");
+        switchTurns();
+        updateTurnText();
+    }
+
+    private void attemptPlaceOnRhombic(int row, int col) {
+        if (rhombicOwner[row][col] != 0) {
+            statusText.setText("That cell is already occupied.");
+            return;
+        }
+        
+        rhombicOwner[row][col] = isBlackTurn ? 1 : 2;
+        rhombics[row][col].setFill(isBlackTurn ? BLACK_STONE : WHITE_STONE);
+
+        statusText.setText("");
+        switchTurns();
+        updateTurnText();
     }
 
 }
