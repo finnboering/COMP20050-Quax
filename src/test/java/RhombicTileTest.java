@@ -43,10 +43,8 @@ public class RhombicTileTest {
         RhombicTile tile1 = new RhombicTile(2, 2);
         RhombicTile tile2 = new RhombicTile(4, 5);
 
-        assertNotEquals(tile1.row, tile2.row,
-                "Each tile should store its own row");
+        assertNotEquals(tile1.row, tile2.row, "Each tile should store its own row");
 
-        assertNotEquals(tile1.col, tile2.col,
-                "Each tile should store its own column");
+        assertNotEquals(tile1.col, tile2.col, "Each tile should store its own column");
     }
 }

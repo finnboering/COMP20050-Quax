@@ -281,9 +281,9 @@ public class QuaxApp extends Application {
     public String getCurrentPlayerTurn() {
         // returns whose turn it is as text
         if (isBlackTurn) {
-            return "BLACK";
+            return "BLACK to play";
         } else {
-            return "WHITE";
+            return "WHITE to play";
         }
     }
 

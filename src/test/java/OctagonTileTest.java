@@ -46,10 +46,8 @@ public class OctagonTileTest {
         OctagonTile tile1 = new OctagonTile(1, 1);
         OctagonTile tile2 = new OctagonTile(3, 4);
 
-        assertNotEquals(tile1.row, tile2.row,
-                "Each tile instance should store its own row value");
+        assertNotEquals(tile1.row, tile2.row, "Each tile instance should store its own row value");
 
-        assertNotEquals(tile1.col, tile2.col,
-                "Each tile instance should store its own column value");
+        assertNotEquals(tile1.col, tile2.col, "Each tile instance should store its own column value");
     }
 }
