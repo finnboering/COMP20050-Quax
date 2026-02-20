@@ -39,6 +39,8 @@ public class QuaxApp extends Application {
         drawBorders(root);
         drawLabels(root);
 
+        drawTurnIndicator(root);
+
         // figure out how big the pop-up window needs to be
         double windowSize = BOARD_SIZE * CELL_SIZE + (OFFSET * 2) - 38;
 
@@ -165,6 +167,16 @@ public class QuaxApp extends Application {
         }
     }
 
+    private void drawTurnIndicator(Pane root) {
+        turnIndicatorText = new Text("Current Turn: BLACK");
+        turnIndicatorText.setFont(Font.font(20));
+        turnIndicatorText.setFill(Color.WHITE); // Shows up on the dark background
+        turnIndicatorText.setX(20);
+        turnIndicatorText.setY(30);
+
+        root.getChildren().add(turnIndicatorText);
+    }
+
     // helper : draws the shapes
 
     private Polygon createOctagon(double x, double y, double size) {
@@ -199,6 +211,12 @@ public class QuaxApp extends Application {
     public void switchTurns() {
         // flips the turn back and forth
         isBlackTurn = !isBlackTurn;
+
+        // keeps track of whose turn it is
+        private boolean isBlackTurn = true;
+
+        // UI text for the turn indicator
+        private Text turnIndicatorText;
     }
 
     public String getCurrentPlayerTurn() {
