@@ -7,6 +7,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import java.util.Scanner;
+import javafx.scene.control.Button;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 public class QuaxApp extends Application {
 
@@ -17,15 +24,33 @@ public class QuaxApp extends Application {
 
     // ui colors
     Color OCTAGON_COLOR = Color.DEEPSKYBLUE;
+    Color OCTAGON_HIGHLIGHT_COLOR = Color.PALETURQUOISE;
     Color RHOMBIC_COLOR = Color.SKYBLUE;
+    Color RHOMBIC_HIGHLIGHT_COLOR = Color.PALETURQUOISE;
     Color BORDER_COLOR = Color.ORANGE;
     Color OUTLINE_COLOR = Color.BLACK;
 
     // keeps track of whose turn it is
     private boolean isBlackTurn = true;
+    private boolean firstMoveDone = false;
+
+    // keeps track of player colour
+    private boolean isBlack = true;
+    private boolean player1 = isBlack;
+    private boolean player2 = !isBlack;
+
+
 
     // ui text for the turn indicator
     private Text turnText;
+    private Text statusText;
+    private Text playerText;
+    private Button pieRuleButton;
+
+
+    // track occupancy of tile: 0 empty, 1 black, 2 white
+    private int[][] octagonOwner = new int[BOARD_SIZE][BOARD_SIZE];
+    private int[][] rhombicOwner = new int[BOARD_SIZE - 1][BOARD_SIZE - 1];
 
     @Override
     public void start(Stage stage) {
@@ -38,8 +63,10 @@ public class QuaxApp extends Application {
         drawBorders(root);
         drawLabels(root);
 
-        // draw the turn indicator
-        drawTurnIndicator(root);
+        // draw the turn indicator and status
+        drawTextBoxes(root);
+        drawPieRuleButton(root);
+
 
         // calculate the base size of the board
         double baseSize = BOARD_SIZE * CELL_SIZE + (OFFSET * 2) - 17; // i  subtracted by 17 here so that there isnt extra white space
@@ -54,15 +81,29 @@ public class QuaxApp extends Application {
         stage.show();
     }
 
-    private void drawTurnIndicator(Pane root) {
-        turnText = new Text("Current Turn: " + getCurrentPlayerTurn());
+    
+    private void drawTextBoxes(Pane root) {
+        turnText = new Text();
         turnText.setFont(Font.font(20));
         turnText.setFill(Color.BLACK);
-        // i wanted it positioned bottom middle for aesthetics
         turnText.setX(150);
         turnText.setY(515);
 
-        root.getChildren().add(turnText);
+        statusText = new Text("");
+        statusText.setFont(Font.font(60));
+        statusText.setFill(Color.RED);
+        statusText.setX(75);
+        statusText.setY(220);
+
+        playerText = new Text("");
+        playerText.setFont(Font.font(60));
+        playerText.setFill(Color.RED);
+        playerText.setX(75);
+        playerText.setY(220);
+
+        updateTurnText();
+        root.getChildren().addAll(turnText, statusText, playerText);
+
     }
 
     private void drawBackground(Pane root) {
@@ -78,9 +119,6 @@ public class QuaxApp extends Application {
 
         root.getChildren().addAll(topBg, bottomBg);
     }
-
-    // the backend game logic
-    private Board boardLogic = new Board();
 
     // arrays to hold our shapes
     private Polygon[][] octagons = new Polygon[BOARD_SIZE][BOARD_SIZE];
@@ -102,25 +140,26 @@ public class QuaxApp extends Application {
                 final int finalC = c;
 
                 // makes the octagons clickable
-                octagon.setOnMouseClicked(event -> {
+                octagon.setOnMouseClicked(event -> attemptPlaceOnOctagon(finalR, finalC));
 
-                    // checks the backend to see if the move is allowed
-                    boolean isValidMove = boardLogic.tryPlacingOctagonTile(finalR, finalC, isBlackTurn);
-
-                    if (isValidMove) {
-                        // change the color based on who clicked
-                        if (isBlackTurn) {
-                            octagon.setFill(Color.BLACK);
-                        } else {
-                            octagon.setFill(Color.WHITE);
-                        }
-
-                        // flip the turn and update the text
-                        switchTurns();
-                        turnText.setText("Current Turn: " + getCurrentPlayerTurn());
+                // highlight valid tiles when hovering over them
+                octagon.setOnMouseEntered(e -> {
+                
+                    // only highlight if empty
+                    if (octagonOwner[finalR][finalC] == 0) {
+                    //octagon.setOpacity(0.5);
+                        octagon.setFill(OCTAGON_HIGHLIGHT_COLOR);
                     }
                 });
 
+                octagon.setOnMouseExited(e -> {
+                
+                    // restore original colour if still empty
+                    if (octagonOwner[finalR][finalC] == 0) {
+                        octagon.setFill(OCTAGON_COLOR);
+                    }
+                });
+            
                 // save it in our array
                 octagons[r][c] = octagon;
 
@@ -147,6 +186,28 @@ public class QuaxApp extends Application {
 
                 // save it in our array
                 rhombics[r][c] = rhombic;
+
+                // variables need to be final for the click event to work
+                final int finalR = r;
+                final int finalC = c;
+
+                rhombic.setOnMouseClicked(e -> attemptPlaceOnRhombic(finalR, finalC));
+
+                rhombic.setOnMouseEntered(e -> {
+                
+                    // only highlight if empty
+                    if (rhombicOwner[finalR][finalC] == 0) {
+                        rhombic.setFill(RHOMBIC_HIGHLIGHT_COLOR);
+                    }
+                });
+                
+                rhombic.setOnMouseExited(e -> {
+                
+                    // restore original colour if still empty
+                    if (rhombicOwner[finalR][finalC] == 0) {
+                        rhombic.setFill(RHOMBIC_COLOR);
+                    }
+                });
 
                 // put it on the screen
                 root.getChildren().add(rhombic);
@@ -216,6 +277,25 @@ public class QuaxApp extends Application {
         }
     }
 
+    private void drawPieRuleButton(Pane root) {
+        // Create pie rule button (hidden at start)
+        pieRuleButton = new Button("Pie Rule");
+
+        pieRuleButton.setLayoutX(10);
+        pieRuleButton.setLayoutY(495);
+
+        pieRuleButton.setVisible(false); // only appears after first move
+
+        pieRuleButton.setOnAction(e -> {
+            doPieRule();          
+            pieRuleButton.setVisible(false);  // disappears after pressed
+        });
+
+        // add it once (hidden) so we can just show/hide it later
+        root.getChildren().add(pieRuleButton);
+    }
+
+
     // helper : draws the shapes
     private Polygon createOctagon(double x, double y, double size) {
         double half = size / 2.0;
@@ -244,10 +324,31 @@ public class QuaxApp extends Application {
         return square;
     }
 
+    private void updateTurnText() {
+        turnText.setText("Current Turn: " + getCurrentPlayerTurn());
+    }
+
     // helper : turn functions
     public void switchTurns() {
         // flips the turn back and forth
         isBlackTurn = !isBlackTurn;
+    }
+
+    public void doPieRule() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        // flips the turn back and forth
+        statusText.setText("Pie Rule Used!");
+        // pie rule logic
+        //player1 = !player1;
+        //player2 = !player2;
+
+        //remove "Pie rule used" after 3 seconds
+        scheduler.schedule(() -> {
+                statusText.setText("");
+            }, 3, TimeUnit.SECONDS);
+            scheduler.shutdown();
+
     }
 
     public String getCurrentPlayerTurn() {
@@ -258,6 +359,71 @@ public class QuaxApp extends Application {
             return "WHITE";
         }
     }
+
+    // SR2.1 & SR2.2 : basic tile placement for octagons
+    private void attemptPlaceOnOctagon(int row, int col) {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        if (!firstMoveDone) {
+            firstMoveDone = true;
+            pieRuleButton.setVisible(true);
+        } else if (pieRuleButton.isVisible()) {
+            pieRuleButton.setVisible(false);
+        }
+
+        // no full legality: only prevent overwriting an occupied cell
+        if (octagonOwner[row][col] != 0) {
+            statusText.setText("Cell occupied!");
+
+            scheduler.schedule(() -> {
+                statusText.setText(""); // Task to be executed after the delay
+            }, 1500, TimeUnit.MILLISECONDS);
+            scheduler.shutdown();
+            return; 
+        }
+
+        // place stone
+        octagonOwner[row][col] = isBlackTurn ? 1 : 2;
+        octagons[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);;
+        
+
+        // clear message + switch turn
+        statusText.setText("");
+        switchTurns();
+        updateTurnText();
+    }
+
+    private void attemptPlaceOnRhombic(int row, int col) {
+        //used to add the 2 second delay
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        
+        if (!firstMoveDone) {
+            firstMoveDone = true;
+            pieRuleButton.setVisible(true);
+        } else if (pieRuleButton.isVisible()) {
+            pieRuleButton.setVisible(false);
+        }
+
+        if (rhombicOwner[row][col] != 0) {
+            statusText.setText("Cell occupied!");
+
+            scheduler.schedule(() -> {
+                statusText.setText(""); // Task to be executed after the delay
+            }, 2, TimeUnit.SECONDS);
+            scheduler.shutdown();
+            return;   
+        }
+            
+        
+        rhombicOwner[row][col] = isBlackTurn ? 1 : 2;
+        rhombics[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);
+
+        statusText.setText("");
+        switchTurns();
+        updateTurnText();
+    }
+
+
 
 
 
