@@ -7,7 +7,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
 import java.util.Scanner;
+
 import javafx.scene.control.Button;
 
 import java.util.concurrent.Executors;
@@ -38,7 +40,6 @@ public class QuaxApp extends Application {
     private boolean isBlack = true;
     private boolean player1 = isBlack;
     private boolean player2 = !isBlack;
-
 
 
     // ui text for the turn indicator
@@ -81,7 +82,7 @@ public class QuaxApp extends Application {
         stage.show();
     }
 
-    
+
     private void drawTextBoxes(Pane root) {
         turnText = new Text();
         turnText.setFont(Font.font(20));
@@ -122,7 +123,7 @@ public class QuaxApp extends Application {
 
     // arrays to hold our shapes
     private Polygon[][] octagons = new Polygon[BOARD_SIZE][BOARD_SIZE];
-    private Rectangle[][] rhombics = new Rectangle[BOARD_SIZE -1][BOARD_SIZE -1];
+    private Rectangle[][] rhombics = new Rectangle[BOARD_SIZE - 1][BOARD_SIZE - 1];
 
     private void drawOctagons(Pane root) {
         for (int r = 0; r < BOARD_SIZE; r++) {
@@ -144,22 +145,22 @@ public class QuaxApp extends Application {
 
                 // highlight valid tiles when hovering over them
                 octagon.setOnMouseEntered(e -> {
-                
+
                     // only highlight if empty
                     if (octagonOwner[finalR][finalC] == 0) {
-                    //octagon.setOpacity(0.5);
+                        //octagon.setOpacity(0.5);
                         octagon.setFill(OCTAGON_HIGHLIGHT_COLOR);
                     }
                 });
 
                 octagon.setOnMouseExited(e -> {
-                
+
                     // restore original colour if still empty
                     if (octagonOwner[finalR][finalC] == 0) {
                         octagon.setFill(OCTAGON_COLOR);
                     }
                 });
-            
+
                 // save it in our array
                 octagons[r][c] = octagon;
 
@@ -194,15 +195,15 @@ public class QuaxApp extends Application {
                 rhombic.setOnMouseClicked(e -> attemptPlaceOnRhombic(finalR, finalC));
 
                 rhombic.setOnMouseEntered(e -> {
-                
+
                     // only highlight if empty
                     if (rhombicOwner[finalR][finalC] == 0) {
                         rhombic.setFill(RHOMBIC_HIGHLIGHT_COLOR);
                     }
                 });
-                
+
                 rhombic.setOnMouseExited(e -> {
-                
+
                     // restore original colour if still empty
                     if (rhombicOwner[finalR][finalC] == 0) {
                         rhombic.setFill(RHOMBIC_COLOR);
@@ -253,10 +254,10 @@ public class QuaxApp extends Application {
 
             // center the text
             topText.setX(pos - topText.getLayoutBounds().getWidth() / 2);
-            topText.setY(OFFSET -27);
+            topText.setY(OFFSET - 27);
 
             bottomText.setX(pos - bottomText.getLayoutBounds().getWidth() / 2);
-            bottomText.setY(BOARD_SIZE * CELL_SIZE + OFFSET -3);
+            bottomText.setY(BOARD_SIZE * CELL_SIZE + OFFSET - 3);
 
 
             // numbers down the sides
@@ -267,10 +268,10 @@ public class QuaxApp extends Application {
             leftText.setFont(labelFont);
             rightText.setFont(labelFont);
 
-            leftText.setX(OFFSET -38);
+            leftText.setX(OFFSET - 38);
             leftText.setY(pos + leftText.getLayoutBounds().getHeight() / 4);
 
-            rightText.setX(BOARD_SIZE * CELL_SIZE + OFFSET -14);
+            rightText.setX(BOARD_SIZE * CELL_SIZE + OFFSET - 14);
             rightText.setY(pos + rightText.getLayoutBounds().getHeight() / 4);
 
             root.getChildren().addAll(topText, bottomText, leftText, rightText);
@@ -287,7 +288,7 @@ public class QuaxApp extends Application {
         pieRuleButton.setVisible(false); // only appears after first move
 
         pieRuleButton.setOnAction(e -> {
-            doPieRule();          
+            doPieRule();
             pieRuleButton.setVisible(false);  // disappears after pressed
         });
 
@@ -334,21 +335,47 @@ public class QuaxApp extends Application {
         isBlackTurn = !isBlackTurn;
     }
 
+    // swap stone colors on the board and sets the turn to player who used rule to BLACK
     public void doPieRule() {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-        // flips the turn back and forth
-        statusText.setText("Pie Rule Used!");
-        // pie rule logic
-        //player1 = !player1;
-        //player2 = !player2;
+        statusText.setText("pie rule used"); // notify when the pie rule is used
 
-        //remove "Pie rule used" after 3 seconds
-        scheduler.schedule(() -> {
-                statusText.setText("");
-            }, 3, TimeUnit.SECONDS);
-            scheduler.shutdown();
+        // swap octagon owner
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
 
+                if (octagonOwner[row][col] != 0) {
+                    if (octagonOwner[row][col] == 1) {
+                        octagonOwner[row][col] = 2;
+                        octagons[row][col].setFill(Color.WHITE);
+                    } else {
+                        octagonOwner[row][col] = 1;
+                        octagons[row][col].setFill(Color.BLACK);
+                    }
+                }
+            }
+        }
+
+        // swap rhombic owner
+        for (int row = 0; row < BOARD_SIZE - 1; row++) {
+            for (int col = 0; col < BOARD_SIZE - 1; col++) {
+
+                if (rhombicOwner[row][col] != 0) {
+                    if (rhombicOwner[row][col] == 1) {
+                        rhombicOwner[row][col] = 2;
+                        rhombics[row][col].setFill(Color.WHITE);
+                    } else {
+                        rhombicOwner[row][col] = 1;
+                        rhombics[row][col].setFill(Color.BLACK);
+                    }
+                }
+
+            }
+        }
+
+        // after pie rule the player who pressed it becomes BLACK
+        isBlackTurn = true;
+        updateTurnText();
     }
 
     public String getCurrentPlayerTurn() {
@@ -379,13 +406,13 @@ public class QuaxApp extends Application {
                 statusText.setText(""); // Task to be executed after the delay
             }, 1500, TimeUnit.MILLISECONDS);
             scheduler.shutdown();
-            return; 
+            return;
         }
 
         // place stone
         octagonOwner[row][col] = isBlackTurn ? 1 : 2;
-        octagons[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);;
-        
+        octagons[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);
+
 
         // clear message + switch turn
         statusText.setText("");
@@ -396,7 +423,7 @@ public class QuaxApp extends Application {
     private void attemptPlaceOnRhombic(int row, int col) {
         //used to add the 2 second delay
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        
+
         if (!firstMoveDone) {
             firstMoveDone = true;
             pieRuleButton.setVisible(true);
@@ -411,10 +438,9 @@ public class QuaxApp extends Application {
                 statusText.setText(""); // Task to be executed after the delay
             }, 2, TimeUnit.SECONDS);
             scheduler.shutdown();
-            return;   
+            return;
         }
-            
-        
+
         rhombicOwner[row][col] = isBlackTurn ? 1 : 2;
         rhombics[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);
 
@@ -422,9 +448,4 @@ public class QuaxApp extends Application {
         switchTurns();
         updateTurnText();
     }
-
-
-
-
-
 }
