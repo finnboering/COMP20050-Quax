@@ -85,20 +85,20 @@ public class QuaxApp extends Application {
         turnText = new Text();
         turnText.setFont(Font.font(20));
         turnText.setFill(Color.BLACK);
-        turnText.setX(150);
-        turnText.setY(515);
+        turnText.setX(13);
+        turnText.setY(513);
 
         statusText = new Text("");
-        statusText.setFont(Font.font(60));
+        statusText.setFont(Font.font(30));
         statusText.setFill(Color.RED);
-        statusText.setX(75);
-        statusText.setY(220);
+        statusText.setX(300);
+        statusText.setY(517);
 
         playerText = new Text("");
-        playerText.setFont(Font.font(60));
+        playerText.setFont(Font.font(30));
         playerText.setFill(Color.RED);
-        playerText.setX(75);
-        playerText.setY(220);
+        playerText.setX(300);
+        playerText.setY(517);
 
         updateTurnText();
         root.getChildren().addAll(turnText, statusText, playerText);
@@ -280,7 +280,7 @@ public class QuaxApp extends Application {
         // Create pie rule button (hidden at start)
         pieRuleButton = new Button("Pie Rule");
 
-        pieRuleButton.setLayoutX(10);
+        pieRuleButton.setLayoutX(220);
         pieRuleButton.setLayoutY(495);
 
         pieRuleButton.setVisible(false); // only appears after first move
@@ -336,7 +336,7 @@ public class QuaxApp extends Application {
     // swap stone colors on the board and sets the turn to player who used rule to BLACK
     public void doPieRule() {
 
-        statusText.setText("pie rule used"); // notify when the pie rule is used
+        statusText.setText("Pie rule used"); // notify when the pie rule is used
 
         // swap octagon owner
         for (int row = 0; row < BOARD_SIZE; row++) {
