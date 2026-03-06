@@ -43,7 +43,6 @@ public class QuaxApp extends Application {
     // ui text for the turn indicator
     private Text turnText;
     private Text statusText;
-    private Text playerText;
     private Button pieRuleButton;
 
 
@@ -94,14 +93,8 @@ public class QuaxApp extends Application {
         statusText.setX(300);
         statusText.setY(517);
 
-        playerText = new Text("");
-        playerText.setFont(Font.font(30));
-        playerText.setFill(Color.RED);
-        playerText.setX(300);
-        playerText.setY(517);
-
         updateTurnText();
-        root.getChildren().addAll(turnText, statusText, playerText);
+        root.getChildren().addAll(turnText, statusText);
 
     }
 
