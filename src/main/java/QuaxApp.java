@@ -404,6 +404,29 @@ public class QuaxApp extends Application {
         octagonOwner[row][col] = isBlackTurn ? 1 : 2;
         octagons[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);
 
+        int currentPlayer = isBlackTurn ? 1 : 2;
+
+        WinChecker winChecker = new WinChecker(BOARD_SIZE);
+
+        int[][] oct = new int[BOARD_SIZE][BOARD_SIZE];
+        int[][] rh = new int[BOARD_SIZE - 1][BOARD_SIZE - 1];
+
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                oct[i][j] = octagonOwner[i][j];
+            }
+        }
+
+        for (int i = 0; i < BOARD_SIZE - 1; i++) {
+            for (int j = 0; j < BOARD_SIZE - 1; j++) {
+                rh[i][j] = rhombicOwner[i][j];
+            }
+        }
+
+        if (winChecker.checkWin(oct, rh, currentPlayer)) {
+            statusText.setText(currentPlayer == 1 ? "BLACK WINS" : "WHITE WINS");
+            return;
+        }
 
         // clear message + switch turn
         statusText.setText("");

@@ -63,5 +63,18 @@ public class Board {
         return grid[row][col];
     }
 
-    // TODO : figure out rhombic tile placement later
+
+    public int getOctagonOwner(int row, int col) {
+        if (octagons[row][col] != null) {
+            return octagons[row][col].getPlayerTile();
+        }
+        return 0;
+    }
+
+    public int getRhombicOwner(int row, int col) {
+        if (rhombics[row][col] != null) {
+            return rhombics[row][col].getPlayerTile();
+        }
+        return 0;
+    }
 }
