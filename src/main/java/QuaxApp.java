@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -33,14 +34,21 @@ public class QuaxApp extends Application {
     // keeps track of whose turn it is
     private boolean isBlackTurn = true;
     private boolean firstMoveDone = false;
+    private boolean pieRuleResolved = false;
 
     // keeps track of player colour
     private boolean isBlack = true;
     private boolean player1 = isBlack;
     private boolean player2 = !isBlack;
 
+    //bot
+    private BotPlayer bot = new BotPlayer();
+    private boolean humanIsBlack;
+    private int humanColour; // 1 = black, 2 = white
 
-    // ui text for the turn indicator
+
+
+    //ui text for the turn indicator
     private Text turnText;
     private Text statusText;
     private Button pieRuleButton;
@@ -49,6 +57,19 @@ public class QuaxApp extends Application {
     // track occupancy of tile: 0 empty, 1 black, 2 white
     private int[][] octagonOwner = new int[BOARD_SIZE][BOARD_SIZE];
     private int[][] rhombicOwner = new int[BOARD_SIZE - 1][BOARD_SIZE - 1];
+
+
+    // constructor to accept colour choice from start screen
+    public QuaxApp(boolean humanIsBlack) {
+        this.humanIsBlack = humanIsBlack;
+        this.humanColour = humanIsBlack ? 1 : 2;
+    }
+
+    // default no-arg constructor required by JavaFX Application
+    public QuaxApp() {
+        this.humanIsBlack = true; // default to human as black
+        this.humanColour = 1;
+    }
 
     @Override
     public void start(Stage stage) {
@@ -77,6 +98,12 @@ public class QuaxApp extends Application {
         stage.setTitle("Quax Board");
         stage.setScene(scene);
         stage.show();
+
+
+        // if human chose white, bot goes first as black
+        if (!humanIsBlack) {
+            triggerBotMove();
+        }
     }
 
 
@@ -281,6 +308,11 @@ public class QuaxApp extends Application {
         pieRuleButton.setOnAction(e -> {
             doPieRule();
             pieRuleButton.setVisible(false);  // disappears after pressed
+            pieRuleButton.setDisable(false);
+
+
+            // after human uses pie rule, trigger bot move
+            triggerBotMove();
         });
 
         // add it once (hidden) so we can just show/hide it later
@@ -320,7 +352,7 @@ public class QuaxApp extends Application {
         turnText.setText("Current Turn: " + getCurrentPlayerTurn());
     }
 
-    // helper : turn functions
+    //helper : turn functions
     public void switchTurns() {
         // flips the turn back and forth
         isBlackTurn = !isBlackTurn;
@@ -380,53 +412,75 @@ public class QuaxApp extends Application {
 
     // SR2.1 & SR2.2 : basic tile placement for octagons
     private void attemptPlaceOnOctagon(int row, int col) {
+        //block clicks when it's the bot's turn
+        if (isBlackTurn && humanColour != 1 || !isBlackTurn && humanColour != 2) return;
+
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
         if (!firstMoveDone) {
             firstMoveDone = true;
-            pieRuleButton.setVisible(true);
+            if (humanIsBlack) {
+                //human went first so show pie rule button but disable it
+                pieRuleButton.setVisible(true);
+                pieRuleButton.setDisable(true);
+            }
         } else if (pieRuleButton.isVisible()) {
             pieRuleButton.setVisible(false);
+            pieRuleButton.setDisable(false);
         }
 
-        // no full legality: only prevent overwriting an occupied cell
+        //prevent overwriting an occupied cell
         if (octagonOwner[row][col] != 0) {
             statusText.setText("Cell occupied!");
 
             scheduler.schedule(() -> {
-                statusText.setText(""); // Task to be executed after the delay
+                statusText.setText(""); //executed after the delay
             }, 1500, TimeUnit.MILLISECONDS);
             scheduler.shutdown();
             return;
         }
 
-        // place stone
+        //place stone
         octagonOwner[row][col] = isBlackTurn ? 1 : 2;
         octagons[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);
 
 
-        // clear message + switch turn
+        //clear message and switch turn
         statusText.setText("");
         switchTurns();
         updateTurnText();
+
+
+        //trigger bot after 0.5 s delay
+        triggerBotMove();
     }
 
     private void attemptPlaceOnRhombic(int row, int col) {
+
+        //block clicks when it's the bot's turn
+        if (isBlackTurn && humanColour != 1 || !isBlackTurn && humanColour != 2) return;
+
+
         //used to add the 2 second delay
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
         if (!firstMoveDone) {
             firstMoveDone = true;
-            pieRuleButton.setVisible(true);
+            if (humanIsBlack) {
+                //human went first so show pie rule button but disable it
+                pieRuleButton.setVisible(true);
+                pieRuleButton.setDisable(true);
+            }
         } else if (pieRuleButton.isVisible()) {
             pieRuleButton.setVisible(false);
+            pieRuleButton.setDisable(false);
         }
 
         if (rhombicOwner[row][col] != 0) {
             statusText.setText("Cell occupied!");
 
             scheduler.schedule(() -> {
-                statusText.setText(""); // Task to be executed after the delay
+                statusText.setText(""); //executed after the delay
             }, 2, TimeUnit.SECONDS);
             scheduler.shutdown();
             return;
@@ -438,5 +492,72 @@ public class QuaxApp extends Application {
         statusText.setText("");
         switchTurns();
         updateTurnText();
+
+
+        //trigger bot after 0.5 s delay
+        triggerBotMove();
     }
+
+    // schedules the bot move with a 0.5 s delay
+    private void triggerBotMove() {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(() ->
+                        Platform.runLater(() -> doBotMove()),
+                500, TimeUnit.MILLISECONDS);
+        scheduler.shutdown();
+    }
+
+    private void doBotMove() {
+
+        //handle pie rule
+        if (humanIsBlack && firstMoveDone && pieRuleButton.isVisible() && !pieRuleResolved) {
+            pieRuleResolved = true;
+            pieRuleButton.setVisible(false);
+            pieRuleButton.setDisable(false);
+
+            if (bot.decidePieRule()) {
+                doPieRule(); //"Pie rule used" message shown
+                isBlackTurn = true;
+                updateTurnText();
+                //clear the "Pie rule used" message after 1.5 seconds
+                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                scheduler.schedule(() -> Platform.runLater(() -> statusText.setText("")), 1500, TimeUnit.MILLISECONDS);
+                scheduler.shutdown();
+                return;
+
+            }
+            //bot declined pie rule
+
+        }
+
+        //pick a random empty tile
+        int[] move = bot.chooseMove(octagonOwner, rhombicOwner);
+        if (move == null) return; //board is full
+
+        int r = move[0];
+        int c = move[1];
+        int tileType = move[2];
+        int botColour = humanIsBlack ? 2 : 1;
+        if (tileType == 0) {
+            //place on octagon
+            octagonOwner[r][c] = botColour;
+            octagons[r][c].setFill(botColour == 1 ? Color.BLACK : Color.WHITE);
+        } else {
+            //place on rhombic
+            rhombicOwner[r][c] = botColour;
+            rhombics[r][c].setFill(botColour == 1 ? Color.BLACK : Color.WHITE);
+        }
+
+        //if human is white, after bot's first move show pie rule button for human
+        if (!humanIsBlack && !firstMoveDone) {
+            firstMoveDone = true;
+            pieRuleButton.setVisible(true);
+        }
+
+        switchTurns();
+        updateTurnText();
+    }
+
+
+
 }
