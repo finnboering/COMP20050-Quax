@@ -27,7 +27,7 @@ public class WinChecker {
                     }
                 }
             }
-        // white goes left -> right
+            // white goes left -> right
         } else {
             for (int row = 0; row < size; row++) {
                 if (octagons[row][0] == player) {

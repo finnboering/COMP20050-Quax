@@ -20,7 +20,7 @@ public class BotPlayer {
         for (int r = 0; r < octagonOwner.length; r++) {
             for (int c = 0; c < octagonOwner[r].length; c++) {
                 if (octagonOwner[r][c] == 0) {
-                    availableMoves.add(new int[]{r, c, 0}); // 0 = octagon
+                    availableMoves.add(new int[]{r, c, 0}); //0 = octagon
                 }
             }
         }
@@ -29,7 +29,7 @@ public class BotPlayer {
         for (int r = 0; r < rhombicOwner.length; r++) {
             for (int c = 0; c < rhombicOwner[r].length; c++) {
                 if (rhombicOwner[r][c] == 0) {
-                    availableMoves.add(new int[]{r, c, 1}); // 1 = rhombic
+                    availableMoves.add(new int[]{r, c, 1}); //1 = rhombic
                 }
             }
         }

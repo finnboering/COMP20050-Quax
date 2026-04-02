@@ -18,7 +18,7 @@ public class StartScreen extends Application {
 
         Label title = new Label("QUAX");
         title.setFont(Font.font(48));
-        title.setTextFill(Color.DEEPSKYBLUE);
+        title.setTextFill(Color.SKYBLUE);
 
         Label subtitle = new Label("Choose your colour");
         subtitle.setFont(Font.font(18));

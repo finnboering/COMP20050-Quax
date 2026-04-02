@@ -23,7 +23,7 @@ public class QuaxApp extends Application {
     private static final int CELL_SIZE = 40;
     private static final int OFFSET = 50;
 
-    // ui colors
+    //ui colors
     Color OCTAGON_COLOR = Color.DEEPSKYBLUE;
     Color OCTAGON_HIGHLIGHT_COLOR = Color.PALETURQUOISE;
     Color RHOMBIC_COLOR = Color.SKYBLUE;
@@ -31,41 +31,45 @@ public class QuaxApp extends Application {
     Color BORDER_COLOR = Color.ORANGE;
     Color OUTLINE_COLOR = Color.BLACK;
 
-    // keeps track of whose turn it is
+    //keeps track of whose turn it is
     private boolean isBlackTurn = true;
     private boolean firstMoveDone = false;
+    //prevents the pie rule from being triggered more than once per game
     private boolean pieRuleResolved = false;
 
-    // keeps track of player colour
+    //keeps track of player colour
     private boolean isBlack = true;
     private boolean player1 = isBlack;
     private boolean player2 = !isBlack;
 
     //bot
     private BotPlayer bot = new BotPlayer();
+    //tracks whether the human is currently playing as black, can change after pie rule
     private boolean humanIsBlack;
-    private int humanColour; // 1 = black, 2 = white
+    private int humanColour; //1 = black, 2 = white
 
     //ui text for the turn indicator
     private Text turnText;
     private Text statusText;
+    //permanent label showing current colour assignments for human and bot
+    private Text playerColourLabel;
     private Button pieRuleButton;
 
 
-    // track occupancy of tile: 0 empty, 1 black, 2 white
+    //track occupation of tile: 0 empty, 1 black, 2 white
     private int[][] octagonOwner = new int[BOARD_SIZE][BOARD_SIZE];
     private int[][] rhombicOwner = new int[BOARD_SIZE - 1][BOARD_SIZE - 1];
 
 
-    // constructor to accept colour choice from start screen
+    //constructor to accept colour choice from the start screen
     public QuaxApp(boolean humanIsBlack) {
         this.humanIsBlack = humanIsBlack;
         this.humanColour = humanIsBlack ? 1 : 2;
     }
 
-    // default no-arg constructor required by JavaFX Application
+    //default no-arg constructor required
     public QuaxApp() {
-        this.humanIsBlack = true; // default to human as black
+        this.humanIsBlack = true; //default to human as black
         this.humanColour = 1;
     }
 
@@ -73,22 +77,23 @@ public class QuaxApp extends Application {
     public void start(Stage stage) {
         Pane root = new Pane();
 
-        // draw all the pieces of the board (in correct order)
+        //draw all the pieces of the board (in correct order)
         drawBackground(root);
         drawOctagons(root);
         drawRhombics(root);
         drawBorders(root);
         drawLabels(root);
 
-        // draw the turn indicator and status
+        //draw the turn indicator and status
         drawTextBoxes(root);
+        drawPlayerColourLabel(root);
         drawPieRuleButton(root);
 
 
-        // calculate the base size of the board
+        //calculate the base size of the board
         double baseSize = BOARD_SIZE * CELL_SIZE + (OFFSET * 2) - 17; // i  subtracted by 17 here so that there isnt extra white space
 
-        // i wanted it to be rectangular so i removed 23 from the right hand side
+        //i wanted it to be rectangular so i removed 23 from the right hand side
         double windowWidth = baseSize - 23;
         double windowHeight = baseSize;
 
@@ -98,7 +103,7 @@ public class QuaxApp extends Application {
         stage.show();
 
 
-        // if human chose white, bot goes first as black
+        //if human chose white, bot goes first as black
         if (!humanIsBlack) {
             triggerBotMove();
         }
@@ -123,8 +128,27 @@ public class QuaxApp extends Application {
 
     }
 
+    private void drawPlayerColourLabel(Pane root) {
+        playerColourLabel = new Text();
+        playerColourLabel.setFont(Font.font(14));
+        playerColourLabel.setFill(Color.BLACK);
+        playerColourLabel.setX(13);
+        playerColourLabel.setY(530);
+        updatePlayerColourLabel();
+        root.getChildren().add(playerColourLabel);
+    }
+
+    private void updatePlayerColourLabel() {
+        //does the label text based on current humanColour value
+        //called after the pie rule to show the new colour assignment
+        String humanColourText = humanColour == 1 ? "BLACK" : "WHITE";
+        String botColourText = humanColour == 1 ? "WHITE" : "BLACK";
+        playerColourLabel.setText("You: " + humanColourText + "  |  Bot: " + botColourText);
+    }
+
+
     private void drawBackground(Pane root) {
-        // dark background blocks behind the board (for BLACK win side)
+        //dark background blocks behind the board for BLACK win side
         double bgWidth = BOARD_SIZE * CELL_SIZE + 45;
         double bgHeight = 34;
 
@@ -137,7 +161,7 @@ public class QuaxApp extends Application {
         root.getChildren().addAll(topBg, bottomBg);
     }
 
-    // arrays to hold our shapes
+    //rrays to hold our shapes
     private Polygon[][] octagons = new Polygon[BOARD_SIZE][BOARD_SIZE];
     private Rectangle[][] rhombics = new Rectangle[BOARD_SIZE - 1][BOARD_SIZE - 1];
 
@@ -148,21 +172,21 @@ public class QuaxApp extends Application {
 
                 Polygon octagon = createOctagon(x, y, CELL_SIZE);
 
-                // add color and outline
+                //add color and outline
                 octagon.setFill(OCTAGON_COLOR);
                 octagon.setStroke(OUTLINE_COLOR);
 
-                // variables need to be final for the click event to work
+                //variables need to be final for the click event to work
                 final int finalR = r;
                 final int finalC = c;
 
-                // makes the octagons clickable
+                //makes the octagons clickable
                 octagon.setOnMouseClicked(event -> attemptPlaceOnOctagon(finalR, finalC));
 
-                // highlight valid tiles when hovering over them
+                //highlight valid tiles when hovering over them
                 octagon.setOnMouseEntered(e -> {
 
-                    // only highlight if empty
+                    //only highlight if empty
                     if (octagonOwner[finalR][finalC] == 0) {
                         //octagon.setOpacity(0.5);
                         octagon.setFill(OCTAGON_HIGHLIGHT_COLOR);
@@ -171,13 +195,13 @@ public class QuaxApp extends Application {
 
                 octagon.setOnMouseExited(e -> {
 
-                    // restore original colour if still empty
+                    //restore original colour if still empty
                     if (octagonOwner[finalR][finalC] == 0) {
                         octagon.setFill(OCTAGON_COLOR);
                     }
                 });
 
-                // save it in our array
+                //save it in our array
                 octagons[r][c] = octagon;
 
                 // put it on the screen
@@ -255,12 +279,12 @@ public class QuaxApp extends Application {
     }
 
     private void drawLabels(Pane root) {
-        Font labelFont = Font.font(14); // keeps font size the same
+        Font labelFont = Font.font(14); //keeps font size the same
 
         for (int i = 0; i < BOARD_SIZE; i++) {
             double pos = i * CELL_SIZE + OFFSET;
 
-            // letters across the top and bottom
+            //letters across the top and bottom
             char letter = (char) ('A' + i);
             Text topText = new Text(String.valueOf(letter));
             Text bottomText = new Text(String.valueOf(letter));
@@ -268,7 +292,7 @@ public class QuaxApp extends Application {
             topText.setFont(labelFont);
             bottomText.setFont(labelFont);
 
-            // center the text
+            //center the text
             topText.setX(pos - topText.getLayoutBounds().getWidth() / 2);
             topText.setY(OFFSET - 27);
 
@@ -276,7 +300,7 @@ public class QuaxApp extends Application {
             bottomText.setY(BOARD_SIZE * CELL_SIZE + OFFSET - 3);
 
 
-            // numbers down the sides
+            //numbers down the sides
             String number = String.valueOf(i + 1);
             Text leftText = new Text(number);
             Text rightText = new Text(number);
@@ -295,30 +319,38 @@ public class QuaxApp extends Application {
     }
 
     private void drawPieRuleButton(Pane root) {
-        // Create pie rule button (hidden at start)
         pieRuleButton = new Button("Pie Rule");
-
         pieRuleButton.setLayoutX(220);
         pieRuleButton.setLayoutY(495);
-
-        pieRuleButton.setVisible(false); // only appears after first move
+        pieRuleButton.setVisible(false);
 
         pieRuleButton.setOnAction(e -> {
-            doPieRule();
-            pieRuleButton.setVisible(false);  // disappears after pressed
+            //don't swap tile colours just show message and swap player identities
+            statusText.setText("Pie rule used");
+
+            //human becomes Black, bot becomes White, bot goes again
+            humanIsBlack = true;
+            humanColour = 1;
+            isBlackTurn = false; //bot's turn (White) goes again
+
+            pieRuleButton.setVisible(false);
             pieRuleButton.setDisable(false);
-            isBlackTurn = true; // human used pie rule, now becomes Black, opponent goes as White
             updateTurnText();
-            // after human uses pie rule, trigger bot move
+            updatePlayerColourLabel();
+
+            //clear message after 1.5s then trigger bot move
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.schedule(() -> Platform.runLater(() -> statusText.setText("")), 1500, TimeUnit.MILLISECONDS);
+            scheduler.shutdown();
+
             triggerBotMove();
         });
 
-        // add it once (hidden) so we can just show/hide it later
         root.getChildren().add(pieRuleButton);
     }
 
 
-    // helper : draws the shapes
+    //helper : draws the shapes
     private Polygon createOctagon(double x, double y, double size) {
         double half = size / 2.0;
         double cut = size / 4.0; // how much to cut off the corners
@@ -394,7 +426,7 @@ public class QuaxApp extends Application {
     }
 
     public String getCurrentPlayerTurn() {
-        // returns whose turn it is as text
+        //returns whose turn it is as text
         if (isBlackTurn) {
             return "BLACK";
         } else {
@@ -444,7 +476,7 @@ public class QuaxApp extends Application {
             octagons[row][col].setFill(Color.WHITE);
         }
 
-        // check win after placing on octagon
+        //check win after placing on octagon
         int currentPlayer;
         if (isBlackTurn) {
             currentPlayer = 1;
@@ -517,12 +549,10 @@ public class QuaxApp extends Application {
         triggerBotMove();
     }
 
-    // schedules the bot move with a 0.5 s delay
+    //schedules the bot move with a 0.5 s delay
     private void triggerBotMove() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.schedule(() ->
-                        Platform.runLater(() -> doBotMove()),
-                500, TimeUnit.MILLISECONDS);
+        scheduler.schedule(() -> Platform.runLater(() -> doBotMove()), 500, TimeUnit.MILLISECONDS);
         scheduler.shutdown();
     }
 
@@ -535,13 +565,14 @@ public class QuaxApp extends Application {
             pieRuleButton.setDisable(false);
 
             if (bot.decidePieRule()) {
-                // don't call doPieRule() — just show the message, no tile colour change needed
+                //don't call doPieRule, show the message, no tile colour change needed
                 statusText.setText("Pie rule used");
-                // bot becomes Black (owns the existing black tile), human becomes White
+                //bot becomes Black and owns the existing black tile, human becomes White
                 humanIsBlack = false;
                 humanColour = 2;
-                isBlackTurn = false; // White's turn (human goes again)
+                isBlackTurn = false; //white's turn so human goes again
                 updateTurnText();
+                updatePlayerColourLabel();
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.schedule(() -> Platform.runLater(() -> statusText.setText("")), 1500, TimeUnit.MILLISECONDS);
                 scheduler.shutdown();
@@ -571,8 +602,10 @@ public class QuaxApp extends Application {
 
         //if human is white, after bot's first move show pie rule button for human
         if (!humanIsBlack && !firstMoveDone) {
+            pieRuleResolved = true;
             firstMoveDone = true;
             pieRuleButton.setVisible(true);
+            return;
         }
 
         switchTurns();

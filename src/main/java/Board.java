@@ -43,20 +43,20 @@ public class Board {
 
         Tile clickedTile = octagons[r][c];
 
-        // only allow placement if it has no tile yet
+        //only allow placement if it has no tile yet
         if (clickedTile.hasNoTile()) {
 
-            // assign the tile to the current player
+            //assign the tile to the current player
             if (isBlackTurn) {
-                clickedTile.setPlayerTile(1); // black
+                clickedTile.setPlayerTile(1); //black
             } else {
-                clickedTile.setPlayerTile(2); // white
+                clickedTile.setPlayerTile(2); //white
             }
 
-            return true; // tile placed successfully
+            return true; //tile placed
         }
 
-        return false; // placement failed
+        return false; //placement failed
     }
 
     public Tile getTile(int row, int col) {
