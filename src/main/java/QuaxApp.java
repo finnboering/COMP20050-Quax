@@ -309,8 +309,8 @@ public class QuaxApp extends Application {
             doPieRule();
             pieRuleButton.setVisible(false);  // disappears after pressed
             pieRuleButton.setDisable(false);
-
-
+            isBlackTurn = true; // human used pie rule, now becomes Black, opponent goes as White
+            updateTurnText();
             // after human uses pie rule, trigger bot move
             triggerBotMove();
         });
@@ -360,13 +360,11 @@ public class QuaxApp extends Application {
 
     // swap stone colors on the board and sets the turn to player who used rule to BLACK
     public void doPieRule() {
+        statusText.setText("Pie rule used");
 
-        statusText.setText("Pie rule used"); // notify when the pie rule is used
-
-        // swap octagon owner
+        // swap octagon owners
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-
                 if (octagonOwner[row][col] != 0) {
                     if (octagonOwner[row][col] == 1) {
                         octagonOwner[row][col] = 2;
@@ -379,10 +377,9 @@ public class QuaxApp extends Application {
             }
         }
 
-        // swap rhombic owner
+        // swap rhombic owners
         for (int row = 0; row < BOARD_SIZE - 1; row++) {
             for (int col = 0; col < BOARD_SIZE - 1; col++) {
-
                 if (rhombicOwner[row][col] != 0) {
                     if (rhombicOwner[row][col] == 1) {
                         rhombicOwner[row][col] = 2;
@@ -392,13 +389,10 @@ public class QuaxApp extends Application {
                         rhombics[row][col].setFill(Color.BLACK);
                     }
                 }
-
             }
         }
 
-        // after pie rule the player who pressed it becomes BLACK
-        isBlackTurn = true;
-        updateTurnText();
+        // NOTE: turn setting is now handled by the caller
     }
 
     public String getCurrentPlayerTurn() {
@@ -516,15 +510,17 @@ public class QuaxApp extends Application {
             pieRuleButton.setDisable(false);
 
             if (bot.decidePieRule()) {
-                doPieRule(); //"Pie rule used" message shown
-                isBlackTurn = true;
+                // don't call doPieRule() — just show the message, no tile colour change needed
+                statusText.setText("Pie rule used");
+                // bot becomes Black (owns the existing black tile), human becomes White
+                humanIsBlack = false;
+                humanColour = 2;
+                isBlackTurn = false; // White's turn (human goes again)
                 updateTurnText();
-                //clear the "Pie rule used" message after 1.5 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.schedule(() -> Platform.runLater(() -> statusText.setText("")), 1500, TimeUnit.MILLISECONDS);
                 scheduler.shutdown();
                 return;
-
             }
             //bot declined pie rule
 
