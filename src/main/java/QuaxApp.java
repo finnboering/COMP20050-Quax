@@ -46,8 +46,6 @@ public class QuaxApp extends Application {
     private boolean humanIsBlack;
     private int humanColour; // 1 = black, 2 = white
 
-
-
     //ui text for the turn indicator
     private Text turnText;
     private Text statusText;
@@ -441,32 +439,36 @@ public class QuaxApp extends Application {
         }
 
         //place stone
-        octagonOwner[row][col] = isBlackTurn ? 1 : 2;
-        octagons[row][col].setFill(isBlackTurn ? Color.BLACK : Color.WHITE);
+        if (isBlackTurn) {
+            octagonOwner[row][col] = 1;
+        } else {
+            octagonOwner[row][col] = 2;
+        }
+        if (isBlackTurn) {
+            octagons[row][col].setFill(Color.BLACK);
+        } else {
+            octagons[row][col].setFill(Color.WHITE);
+        }
 
-        int currentPlayer = isBlackTurn ? 1 : 2;
+        // check win after placing on octagon
+        int currentPlayer;
+        if (isBlackTurn) {
+            currentPlayer = 1;
+        } else {
+            currentPlayer = 2;
+        }
 
         WinChecker winChecker = new WinChecker(BOARD_SIZE);
 
-        int[][] oct = new int[BOARD_SIZE][BOARD_SIZE];
-        int[][] rh = new int[BOARD_SIZE - 1][BOARD_SIZE - 1];
-
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                oct[i][j] = octagonOwner[i][j];
+        if (winChecker.checkWin(octagonOwner, rhombicOwner, currentPlayer)) {
+            if (currentPlayer == 1) {
+                statusText.setText("BLACK WINS");
+            } else {
+                statusText.setText("WHITE WINS");
             }
-        }
-
-        for (int i = 0; i < BOARD_SIZE - 1; i++) {
-            for (int j = 0; j < BOARD_SIZE - 1; j++) {
-                rh[i][j] = rhombicOwner[i][j];
-            }
-        }
-
-        if (winChecker.checkWin(oct, rh, currentPlayer)) {
-            statusText.setText(currentPlayer == 1 ? "BLACK WINS" : "WHITE WINS");
             return;
         }
+
 
         //clear message and switch turn
         statusText.setText("");

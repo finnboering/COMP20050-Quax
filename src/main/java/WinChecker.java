@@ -1,3 +1,9 @@
+/*
+using DFS to search through connected tiles.
+ it checks if there is a continuous path from one side of the board to the other.
+ DFS works well here since we only care if a path exists.
+*/
+
 public class WinChecker {
 
     private int size;
@@ -6,38 +12,42 @@ public class WinChecker {
         this.size = size;
     }
 
-    public boolean checkWin(int[][] octagon, int[][] rhombic, int player) {
+    // main win check (uses DFS + rhombics)
+    public boolean checkWin(int[][] octagons, int[][] rhombics, int player) {
 
+        //track visited tiles so we dont loop
         boolean[][] visited = new boolean[size][size];
 
+        // black goes top -> bottom
         if (player == 1) {
             for (int col = 0; col < size; col++) {
-                if (octagon[0][col] == player) {
-                    if (explorePath(octagon, rhombic, visited, 0, col, player)) {
+                if (octagons[0][col] == player) {
+                    if (findPath(octagons, rhombics, visited, 0, col, player)) {
                         return true;
                     }
                 }
             }
+        // white goes left -> right
         } else {
             for (int row = 0; row < size; row++) {
-                if (octagon[row][0] == player) {
-                    if (explorePath(octagon, rhombic, visited, row, 0, player)) {
+                if (octagons[row][0] == player) {
+                    if (findPath(octagons, rhombics, visited, row, 0, player)) {
                         return true;
                     }
                 }
             }
         }
-
         return false;
     }
 
+    // same thing but no rhombics
     public boolean checkWin(int[][] board, int player) {
         boolean[][] visited = new boolean[size][size];
 
         if (player == 1) {
             for (int col = 0; col < size; col++) {
                 if (board[0][col] == player) {
-                    if (explorePath(board, null, visited, 0, col, player)) {
+                    if (findPath(board, null, visited, 0, col, player)) {
                         return true;
                     }
                 }
@@ -45,7 +55,7 @@ public class WinChecker {
         } else {
             for (int row = 0; row < size; row++) {
                 if (board[row][0] == player) {
-                    if (explorePath(board, null, visited, row, 0, player)) {
+                    if (findPath(board, null, visited, row, 0, player)) {
                         return true;
                     }
                 }
@@ -56,48 +66,50 @@ public class WinChecker {
     }
 
 
-    private boolean explorePath(int[][] board, int[][] rhombic, boolean[][] visited, int row, int col, int player) {
+    // DFS to try find a path
+    private boolean findPath(int[][] octagons, int[][] rhombics, boolean[][] visited, int row, int col, int player) {
+        // stop if invalid or already seen
         if (row < 0 || col < 0 || row >= size || col >= size) return false;
-        if (visited[row][col] || board[row][col] != player) return false;
+        if (visited[row][col] || octagons[row][col] != player) return false;
 
+        // mark as visited
         visited[row][col] = true;
 
-        // WIN CONDITIONS
+        // reached the other side = win
         if (player == 1 && row == size - 1) return true; // BLACK reached bottom
         if (player == 2 && col == size - 1) return true; // WHITE reached right
 
-        // normal directions
-        if (explorePath(board, rhombic, visited, row+1, col, player) ||
-                explorePath(board, rhombic, visited, row-1, col, player) ||
-                explorePath(board, rhombic, visited, row, col+1, player) ||
-                explorePath(board, rhombic, visited, row, col-1, player)) {
+        // normal moves ( down / up / right / left )
+        if (findPath(octagons, rhombics, visited, row+1, col, player) || findPath(octagons, rhombics, visited, row-1, col, player) || findPath(octagons, rhombics, visited, row, col+1, player) || findPath(octagons, rhombics, visited, row, col-1, player)) {
             return true;
         }
 
-// 🔥 ADD THIS (diagonal via rhombics)
-        if (rhombic != null) {
-
-            // down-right
-            if (row < size-1 && col < size-1 && rhombic[row][col] == player) {
-                if (explorePath(board, rhombic, visited, row+1, col+1, player)) return true;
+        // diagonal moves using rhombics
+        if (rhombics != null) {
+            // down -> right
+            if (row < size-1 && col < size-1 && rhombics[row][col] == player && octagons[row+1][col+1] == player) {
+                if (findPath(octagons, rhombics, visited, row+1, col+1, player))
+                    return true;
             }
 
-            // down-left
-            if (row < size-1 && col > 0 && rhombic[row][col-1] == player) {
-                if (explorePath(board, rhombic, visited, row+1, col-1, player)) return true;
+            // down -> left
+            if (row < size-1 && col > 0 && rhombics[row][col-1] == player && octagons[row+1][col-1] == player) {
+                if (findPath(octagons, rhombics, visited, row+1, col-1, player))
+                    return true;
             }
 
-            // up-right
-            if (row > 0 && col < size-1 && rhombic[row-1][col] == player) {
-                if (explorePath(board, rhombic, visited, row-1, col+1, player)) return true;
+            // up -> right
+            if (row > 0 && col < size-1 && rhombics[row-1][col] == player && octagons[row-1][col+1] == player) {
+                if (findPath(octagons, rhombics, visited, row-1, col+1, player))
+                    return true;
             }
 
-            // up-left
-            if (row > 0 && col > 0 && rhombic[row-1][col-1] == player) {
-                if (explorePath(board, rhombic, visited, row-1, col-1, player)) return true;
+            // up -> left
+            if (row > 0 && col > 0 && rhombics[row-1][col-1] == player && octagons[row-1][col-1] == player) {
+                if (findPath(octagons, rhombics, visited, row-1, col-1, player))
+                    return true;
             }
         }
-
         return false;
     }
 }
