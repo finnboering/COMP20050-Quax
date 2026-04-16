@@ -1,3 +1,7 @@
+import game.Board;
+import game.OctagonTile;
+import game.RhombicTile;
+import game.Tile;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  -The board is created successfully
  -All tiles are initialized
  -The board follows the alternating octagon/rhombic pattern
- -Tile placement works correctly
+ -game.Tile placement works correctly
  -Illegal moves like overwriting tiles are prevented
  */
 

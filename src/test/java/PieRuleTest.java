@@ -1,10 +1,12 @@
+import game.Board;
+import game.QuaxApp;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * PieRuleTest
  *
- * Tests pie rule logic in QuaxApp.
+ * Tests pie rule logic in game.QuaxApp.
  *
  * This verifies that:
  -doPieRule swaps octagon ownership from black to white and vice versa

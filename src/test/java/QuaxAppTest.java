@@ -1,3 +1,4 @@
+import game.QuaxApp;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * QuaxAppTest
- * Integration test for the QuaxApp UI start up
+ * Integration test for the game.QuaxApp UI start up
  * This verifies that:
   -JavaFX runtime initializes correctly
   -Game scene is created when human plays as black

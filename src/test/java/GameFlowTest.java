@@ -1,3 +1,4 @@
+import game.Board;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
  * This test verifies that:
  -Multiple valid moves can be placed in sequence
- -Board state updates correctly after each move
+ -game.Board state updates correctly after each move
  -Turn switching works during gameplay
  -Game rules are preserved across multiple moves
  */

@@ -1,13 +1,15 @@
+import game.OctagonTile;
+import game.RhombicTile;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * TileTest
  *
- * Tests base Tile class functionality.
+ * Tests base game.Tile class functionality.
  *
  * Verifies:
- -Tile ownership
+ -game.Tile ownership
  -Player tile assignment
  -Empty tile detection
  -Coordinate correctness
@@ -47,7 +49,7 @@ public class TileTest {
     void testTileCoordinatesStoredCorrectly() {
         RhombicTile tile = new RhombicTile(5,7);
 
-        assertEquals(5, tile.row);
-        assertEquals(7, tile.col);
+        assertEquals(5, tile.getRow());
+        assertEquals(7, tile.getCol());
     }
 }

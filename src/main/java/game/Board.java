@@ -1,3 +1,5 @@
+package game;
+
 public class Board {
 
     // size of the board
@@ -76,5 +78,19 @@ public class Board {
             return rhombics[row][col].getPlayerTile();
         }
         return 0;
+    }
+
+    public java.util.List<Tile> getTiles() {
+        java.util.List<Tile> tiles = new java.util.ArrayList<>();
+
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                if (grid[r][c] != null) {
+                    tiles.add(grid[r][c]);
+                }
+            }
+        }
+
+        return tiles;
     }
 }

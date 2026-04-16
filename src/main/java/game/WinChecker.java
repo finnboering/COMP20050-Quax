@@ -1,4 +1,4 @@
-/*
+package game;/*
 using DFS to search through connected tiles.
  it checks if there is a continuous path from one side of the board to the other.
  DFS works well here since we only care if a path exists.

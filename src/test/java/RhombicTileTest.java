@@ -1,3 +1,5 @@
+import game.RhombicTile;
+import game.Tile;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  *Tests rhombic tile functionality:
  -Coordinate storage
- -Tile inheritance
+ -game.Tile inheritance
  -Initial empty tile state
  */
 
@@ -16,8 +18,8 @@ public class RhombicTileTest {
     void testConstructorCoordinates() {
         RhombicTile tile = new RhombicTile(6,8);
 
-        assertEquals(6, tile.row);
-        assertEquals(8, tile.col);
+        assertEquals(6, tile.getRow());
+        assertEquals(8, tile.getCol());
     }
 
     @Test

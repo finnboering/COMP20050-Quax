@@ -1,8 +1,10 @@
+package game;
+
 // base class for rhombic and octagon tiles & stores the grid position of a tiles
 public abstract class Tile {
 
-    int row; // row pos
-    int col; // col pos
+    private int row; // row pos
+    private int col; // col pos
 
     // 0 is empty | 1 is black | 2 is white
     int playerTile;
@@ -28,6 +30,6 @@ public abstract class Tile {
         return playerTile == 0;
     }
 
-    // public int getRow() { return row; }
-    // public int getCol() { return col; }
+    public int getRow() { return row; }
+    public int getCol() { return col; }
 }

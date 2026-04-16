@@ -1,10 +1,11 @@
+import game.WinChecker;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * WinCheckerTest
  *
- * Tests the WinChecker DFS win detection logic.
+ * Tests the game.WinChecker DFS win detection logic.
  *
  * This verifies that:
  -No win is detected on an empty board

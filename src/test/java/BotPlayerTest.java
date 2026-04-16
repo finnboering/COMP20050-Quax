@@ -1,13 +1,14 @@
+import game.BotPlayer;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * BotPlayerTest
  *
- * Tests the BotPlayer AI logic.
+ * Tests the game.BotPlayer AI logic.
  *
  * This verifies that:
- -BotPlayer can be instantiated
+ -game.BotPlayer can be instantiated
  -chooseMove returns a valid move on an empty board
  -chooseMove returns null when the board is full
  -chooseMove returns a move with a valid tile type (0 = octagon, 1 = rhombic)

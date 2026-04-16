@@ -1,3 +1,6 @@
+import game.Board;
+import game.OctagonTile;
+import game.Tile;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  Tests octagon tile functionality:
  -Coordinate storage
- -Inheritance from Tile class
+ -Inheritance from game.Tile class
  -Initial empty tile
  */
 
@@ -16,8 +19,8 @@ public class OctagonTileTest {
     void testConstructorSetsCoordinates() {
         OctagonTile tile = new OctagonTile(3,4);
 
-        assertEquals(3, tile.row);
-        assertEquals(4, tile.col);
+        assertEquals(3, tile.getRow());
+        assertEquals(4, tile.getCol());
     }
 
     @Test
